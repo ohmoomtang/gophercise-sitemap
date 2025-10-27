@@ -5,6 +5,7 @@ package utils
 
 import (
 	"io"
+	"net/url"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -50,4 +51,29 @@ func ParseLink(htmlReader io.Reader) ([]Link, error) {
 		}
 	}
 	return links, nil
+}
+
+func CleansingLinks(links []Link, inputUrl string) ([]Link, error) {
+	var newLinks []Link
+	//Grab FQDN with protocol scheme from input URL first
+	parsedURL, err := url.Parse(inputUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	fqdn := parsedURL.Scheme + "://" + parsedURL.Host
+
+	//Add FQDN to the Link if not existing
+	for _, link := range links {
+		validatedLink, err := url.Parse(link.Href)
+		if err != nil {
+			return nil, err
+		}
+		if validatedLink.Scheme == "" && validatedLink.Host == "" {
+			link.Href = fqdn + link.Href
+		}
+		newLinks = append(newLinks, Link{link.Href, link.Text})
+	}
+
+	return newLinks, nil
 }

@@ -24,6 +24,11 @@ var rootCmd = &cobra.Command{
 			fmt.Println("Error occured! :", err)
 			os.Exit(1)
 		}
+		outfile, err := cmd.Flags().GetString("output")
+		if err != nil {
+			fmt.Println("Error occured! :", err)
+			os.Exit(1)
+		}
 		urlValid, err := utils.CheckURL(url)
 		if err != nil && !urlValid {
 			fmt.Println("Error occured! :", err)
@@ -40,7 +45,12 @@ var rootCmd = &cobra.Command{
 			fmt.Println("Error occured! :", err)
 			os.Exit(1)
 		}
-		utils.WriteToXML(links, "out.xml")
+		newLinks, err := utils.CleansingLinks(links, url)
+		if err != nil {
+			fmt.Println("Error occured! :", err)
+			os.Exit(1)
+		}
+		utils.WriteToXML(newLinks, outfile)
 	},
 }
 
@@ -63,5 +73,6 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().StringP("url", "u", "", "Specify URL for genearting sitemap")
+	rootCmd.Flags().StringP("output", "o", "", "Specify output XML file (default is to STDOUT)")
 	rootCmd.MarkFlagRequired("url")
 }
