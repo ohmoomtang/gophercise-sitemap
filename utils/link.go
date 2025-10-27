@@ -72,7 +72,12 @@ func CleansingLinks(links []Link, inputUrl string) ([]Link, error) {
 		if validatedLink.Scheme == "" && validatedLink.Host == "" {
 			link.Href = fqdn + link.Href
 		}
-		newLinks = append(newLinks, Link{link.Href, link.Text})
+		//Filter out not similar domain link and mailto link
+		if strings.Contains(link.Href, parsedURL.Host) {
+			if validatedLink.Scheme != "mailto" {
+				newLinks = append(newLinks, Link{link.Href, link.Text})
+			}
+		}
 	}
 
 	return newLinks, nil
